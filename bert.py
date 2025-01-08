@@ -302,6 +302,24 @@ class HateSpeechDetector:
         plt.ylabel('Accuracy')
         plt.legend()
         
+        # Plot precision
+        plt.subplot(1, 2, 2)
+        plt.plot(self.history.history['precision'], label='Training Precision')
+        plt.plot(self.history.history['val_precision'], label='Validation Precision')
+        plt.title('Model Precision')
+        plt.xlabel('Epoch')
+        plt.ylabel('Precision')
+        plt.legend()
+        
+        # Plot recall
+        plt.subplot(1, 2, 2)
+        plt.plot(self.history.history['recall'], label='Training Recall')
+        plt.plot(self.history.history['val_recall'], label='Validation Recall')
+        plt.title('Model Recall')
+        plt.xlabel('Epoch')
+        plt.ylabel('Recall')
+        plt.legend()
+        
         plt.tight_layout()
         plt.savefig(f'training_history_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png')
         plt.close()
