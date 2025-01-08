@@ -244,18 +244,20 @@ class HateSpeechDetector:
         callbacks = [
             tf.keras.callbacks.EarlyStopping(
                 monitor='val_loss',
-                patience=3,
+                patience=5,
                 restore_best_weights=True
             ),
             tf.keras.callbacks.ModelCheckpoint(
                 f'model_checkpoint_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
+                filepath='best_model.h5',
+                monitor='val_loss',
                 save_best_only=True
             ),
             tf.keras.callbacks.ReduceLROnPlateau(
                 monitor='val_loss',
                 factor=0.2,
-                patience=2,
-                min_lr=5e-7
+                patience=3,
+                min_lr=1e-6
             )
         ]
         
@@ -465,13 +467,15 @@ if __name__ == "__main__":
 
     # Load test data
     test_texts = pd.read_csv("datasets/test_data.csv")['text']
+    processed_test_texts = [detector.preprocess_text(t) for t in test_texts]
     predictions, probabilities = detector.predict(test_texts)
 
     # Load the saved model
     detector = HateSpeechDetector.load_model("saved_model")
 
     # Print predictions
-    for text, pred, prob in zip(test_texts, predictions, probabilities):
+    for text, pred, prob in zip(test_texts, processed_test_texts, predictions, probabilities):
         print(f"Text: {text}")
+        print(f"Processed text: {processed_test_texts}")
         print(f"Predicted label: {pred}")
         print(f"Probabilities: {prob}\n")

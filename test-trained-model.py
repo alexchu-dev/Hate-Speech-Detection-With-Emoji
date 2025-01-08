@@ -3,15 +3,19 @@ import tensorflow as tf
 import pandas as pd
 import re
 import emoji
+import unicodedata2
 
 # Preprocessing function
 def preprocess_text(text):
     if not isinstance(text, str):
         return ""
-    
+    text = unicodedata2.normalize('NFKC', text)
     # Normalize emojis
     text = emoji.demojize(text, delimiters=(" ", " "))
+    # Replace : and _
+    text = text.replace(":", " ").replace("_", " ")
     
+    print("After emoji demojize: ", text)
     # Replace obfuscated characters
     text = text.replace('0', 'o').replace('1', 'i').replace('3', 'e').replace('$', 's')
     text = re.sub(r'[!@#$%^&*]', '', text)
@@ -34,14 +38,8 @@ def weighted_loss(y_true, y_pred):
     return tf.reduce_mean(weighted_loss)
 
 # Load the saved model
-model_path = "hate_speech_detection_model"
-loaded_model = tf.keras.models.load_model(
-    model_path,
-    custom_objects={
-        "TFBertForSequenceClassification": TFBertForSequenceClassification,
-        "weighted_loss": weighted_loss
-    }
-)
+model_path = "saved_model"
+loaded_model = TFBertForSequenceClassification.from_pretrained(model_path)
 print("Model loaded successfully!")
 
 # Load the tokenizer
