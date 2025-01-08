@@ -249,7 +249,6 @@ class HateSpeechDetector:
             ),
             tf.keras.callbacks.ModelCheckpoint(
                 f'model_checkpoint_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
-                filepath='best_model.h5',
                 monitor='val_loss',
                 save_best_only=True
             ),
