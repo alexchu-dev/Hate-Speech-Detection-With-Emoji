@@ -481,8 +481,9 @@ if __name__ == "__main__":
     detector = HateSpeechDetector.load_model("saved_model")
 
     # Print predictions
-    for text, processed_test_texts, pred, prob in zip(test_texts, processed_test_texts, predictions, probabilities):
+    label_map = {0: "Hate Speech", 1: "Offensive Language", 2: "Neutral"}
+    for text, processed_test_texts, label, prob in zip(test_texts, processed_test_texts, predictions, probabilities):
         print(f"Original Text: {text}")
         print(f"Processed text: {processed_test_texts}")
-        print(f"Predicted label: {pred}")
+        print(f"Predicted Label: {label_map[label]}")
         print(f"Probabilities: {prob}\n")
