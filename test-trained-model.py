@@ -80,3 +80,11 @@ for text, processed, label, prob in zip(texts_to_predict, processed_texts, predi
     print(f"Processed Text: {processed}")
     print(f"Predicted Label: {label_map[label]}")
     print(f"Probabilities: {prob}\n")
+    
+test_text = ["🔪🧑🏿‍🦲", "👳🏾‍♂️ is 💩", "love ❤️","🧑🏿‍🦲🤢","𝔽𝕌ℂ𝕂 𝕐𝕆𝕌","ᶠᵁᶜᴷ ʸᴼᵁ","I ❤️ you"]
+processed_texts, predictions, probabilities = predict_texts(test_text, tokenizer, loaded_model)
+for text, processed, label, prob in zip(test_text, processed_texts, predictions, probabilities):
+    print(f"Original Text: {text}")
+    print(f"Processed Text: {processed}")
+    print(f"Predicted Label: {label_map[label]}")
+    print(f"Probabilities: {prob}\n")

@@ -80,30 +80,23 @@ class HateSpeechDetector:
         
         # Lowercase
         text = text.lower()
-
+        # Normalize unicode characters
         text = unicodedata2.normalize('NFKC', text)
-
+        # Remove URLs
+        text = re.sub(r'http\S+', '', text)
+        # Remove username tags but keep certain obfuscations
+        text = re.sub(r'@\b(?!ss\b|\$\$\b)\w+', '', text)        # Remove hashtags
+        text = re.sub(r'#\w+', '', text)
         # Decode emojis to text description
         text = emoji.demojize(text, delimiters=(" ", " "))
-
         # Replace : and _
         text = text.replace(":", " ").replace("_", " ")
-
         # Replace obfuscated characters
-        text = text.replace('0', 'o').replace('1', 'i').replace('3', 'e').replace('$', 's').replace('5', 's').replace('8', 'b').replace('9', 'g')
-        
+        text = text.replace('0', 'o').replace('1', 'i').replace('3', 'e').replace('$', 's').replace('5', 's').replace('@', 'a').replace('8', 'b').replace('9', 'g')
         # Handle common issues
         text = text.replace('\n', ' ')  # Replace newlines with space
         text = re.sub(r'\s+', ' ', text).strip()  # Remove extra whitespace
         text = text.strip()
-        # Remove username tags
-        text = re.sub(r'\b@\w+', '', text)
-        # Remove URLs
-        text = re.sub(r'http\S+', '', text)
-        # Remove hashtags
-        text = re.sub(r'#\w+', '', text)
-        # Remove username tags but keep certain obfuscations
-        text = re.sub(r'@\b(?!ss\b|\$\$\b)\w+', '', text)
         return text
 
     def prepare_data(self, df, text_column):
@@ -256,7 +249,7 @@ class HateSpeechDetector:
                 monitor='val_loss',
                 factor=0.2,
                 patience=2,
-                min_lr=1e-6
+                min_lr=5e-7
             )
         ]
         
@@ -282,45 +275,42 @@ class HateSpeechDetector:
         
     def plot_training_history(self):
         """Plot training metrics."""
-        plt.figure(figsize=(12, 4))
+        fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+        fig.suptitle('Training and Validation Metrics', fontsize=16)
         
         # Plot loss
-        plt.subplot(1, 2, 1)
-        plt.plot(self.history.history['loss'], label='Training Loss')
-        plt.plot(self.history.history['val_loss'], label='Validation Loss')
-        plt.title('Model Loss')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.legend()
+        axs[0, 0].plot(self.history.history['loss'], label='Training Loss')
+        axs[0, 0].plot(self.history.history['val_loss'], label='Validation Loss')
+        axs[0, 0].set_title('Loss')
+        axs[0, 0].set_xlabel('Epoch')
+        axs[0, 0].set_ylabel('Loss')
+        axs[0, 0].legend()
         
         # Plot accuracy
-        plt.subplot(1, 2, 2)
-        plt.plot(self.history.history['accuracy'], label='Training Accuracy')
-        plt.plot(self.history.history['val_accuracy'], label='Validation Accuracy')
-        plt.title('Model Accuracy')
-        plt.xlabel('Epoch')
-        plt.ylabel('Accuracy')
-        plt.legend()
+        axs[0, 1].plot(self.history.history['accuracy'], label='Training Accuracy')
+        axs[0, 1].plot(self.history.history['val_accuracy'], label='Validation Accuracy')
+        axs[0, 1].set_title('Accuracy')
+        axs[0, 1].set_xlabel('Epoch')
+        axs[0, 1].set_ylabel('Accuracy')
+        axs[0, 1].legend()
         
         # Plot precision
-        plt.subplot(1, 2, 2)
-        plt.plot(self.history.history['precision'], label='Training Precision')
-        plt.plot(self.history.history['val_precision'], label='Validation Precision')
-        plt.title('Model Precision')
-        plt.xlabel('Epoch')
-        plt.ylabel('Precision')
-        plt.legend()
+        axs[1, 0].plot(self.history.history['precision'], label='Training Precision')
+        axs[1, 0].plot(self.history.history['val_precision'], label='Validation Precision')
+        axs[1, 0].set_title('Precision')
+        axs[1, 0].set_xlabel('Epoch')
+        axs[1, 0].set_ylabel('Precision')
+        axs[1, 0].legend()
         
         # Plot recall
-        plt.subplot(1, 2, 2)
-        plt.plot(self.history.history['recall'], label='Training Recall')
-        plt.plot(self.history.history['val_recall'], label='Validation Recall')
-        plt.title('Model Recall')
-        plt.xlabel('Epoch')
-        plt.ylabel('Recall')
-        plt.legend()
+        axs[1, 1].plot(self.history.history['recall'], label='Training Recall')
+        axs[1, 1].plot(self.history.history['val_recall'], label='Validation Recall')
+        axs[1, 1].set_title('Recall')
+        axs[1, 1].set_xlabel('Epoch')
+        axs[1, 1].set_ylabel('Recall')
+        axs[1, 1].legend()
         
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
         plt.savefig(f'training_history_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png')
         plt.close()
     
@@ -491,8 +481,8 @@ if __name__ == "__main__":
     detector = HateSpeechDetector.load_model("saved_model")
 
     # Print predictions
-    for text, pred, prob in zip(test_texts, processed_test_texts, predictions, probabilities):
-        print(f"Text: {text}")
+    for text, processed_test_texts, pred, prob in zip(test_texts, processed_test_texts, predictions, probabilities):
+        print(f"Original Text: {text}")
         print(f"Processed text: {processed_test_texts}")
         print(f"Predicted label: {pred}")
         print(f"Probabilities: {prob}\n")
