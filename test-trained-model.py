@@ -7,25 +7,29 @@ import unicodedata2
 
 # Preprocessing function
 def preprocess_text(text):
-    if not isinstance(text, str):
+    if pd.isna(text):
         return ""
+    
+    # Lowercase
+    text = text.lower()
+    # Normalize unicode characters
     text = unicodedata2.normalize('NFKC', text)
-    # Normalize emojis
+    # Remove URLs
+    text = re.sub(r'http\S+', '', text)
+    # Replace obfuscated characters
+    text = text.replace('0', 'o').replace('1', 'l').replace('!', 'i').replace('3', 'e').replace('$', 's').replace('5', 's').replace('8', 'b').replace('9', 'g')
+    # Remove username tags but keep certain obfuscations
+    text = re.sub(r'@\b(?!ss\b|ggot\b|\$\$\b|f@990t\b)\w+', '', text).replace('@', 'a')
+    # Remove hashtags
+    text = re.sub(r'#\w+', '', text)
+    # Decode emojis to text description
     text = emoji.demojize(text, delimiters=(" ", " "))
     # Replace : and _
     text = text.replace(":", " ").replace("_", " ")
-    
-    print("After emoji demojize: ", text)
-    # Replace obfuscated characters
-    text = text.replace('0', 'o').replace('1', 'i').replace('3', 'e').replace('$', 's')
-    text = re.sub(r'[!@#$%^&*]', '', text)
-    
-    # Remove special characters
-    text = re.sub(r'[^a-zA-Z\s]', '', text)
-    
-    # Replace multiple spaces with a single space
-    text = re.sub(r'\s+', ' ', text).strip()
-    
+    # Handle common issues
+    text = text.replace('\n', ' ')  # Replace newlines with space
+    text = re.sub(r'\s+', ' ', text).strip()  # Remove extra whitespace
+    text = text.strip()
     return text
 
 # Define custom loss function

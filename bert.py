@@ -78,21 +78,22 @@ class HateSpeechDetector:
         if pd.isna(text):
             return ""
         
-        # Lowercase
+         # Lowercase
         text = text.lower()
         # Normalize unicode characters
         text = unicodedata2.normalize('NFKC', text)
         # Remove URLs
         text = re.sub(r'http\S+', '', text)
+        # Replace obfuscated characters
+        text = text.replace('0', 'o').replace('1', 'l').replace('!', 'i').replace('3', 'e').replace('$', 's').replace('5', 's').replace('8', 'b').replace('9', 'g')
         # Remove username tags but keep certain obfuscations
-        text = re.sub(r'@\b(?!ss\b|\$\$\b)\w+', '', text)        # Remove hashtags
+        text = re.sub(r'@\b(?!ss\b|ggot\b|\$\$\b|f@990t\b)\w+', '', text).replace('@', 'a')
+        # Remove hashtags
         text = re.sub(r'#\w+', '', text)
         # Decode emojis to text description
         text = emoji.demojize(text, delimiters=(" ", " "))
         # Replace : and _
         text = text.replace(":", " ").replace("_", " ")
-        # Replace obfuscated characters
-        text = text.replace('0', 'o').replace('1', 'i').replace('3', 'e').replace('$', 's').replace('5', 's').replace('@', 'a').replace('8', 'b').replace('9', 'g')
         # Handle common issues
         text = text.replace('\n', ' ')  # Replace newlines with space
         text = re.sub(r'\s+', ' ', text).strip()  # Remove extra whitespace
