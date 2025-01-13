@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from tensorflow import keras
 import pandas as pd
@@ -14,12 +15,26 @@ import seaborn as sns
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 print(tf.config.list_physical_devices('GPU'))
 
+# Constants
+model_name = 'bert-base-uncased'
+data_file = "datasets/labeled_data.csv"
+
+# Directories for logs, figures, models, and errors
+log_dir = "logs"
+fig_dir = "figures"
+model_dir = "models"
+error_analytics_dir = "error_analytics"
+os.makedirs(log_dir, exist_ok=True)
+os.makedirs(fig_dir, exist_ok=True)
+os.makedirs(model_dir, exist_ok=True)
+os.makedirs(error_analytics_dir, exist_ok=True)
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(f'training_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'),
+        logging.FileHandler(os.path.join(log_dir, f'training_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')),
         logging.StreamHandler()
     ]
 )
@@ -123,7 +138,7 @@ class HateSpeechDetector:
     def tokenize_data(self, texts, labels):
         """Tokenize text data for model input."""
         if self.tokenizer is None:
-            self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+            self.tokenizer = BertTokenizer.from_pretrained(model_name)
             
         encodings = self.tokenizer(
             list(texts),
@@ -150,7 +165,7 @@ class HateSpeechDetector:
         """Initialize the model architecture."""
         if self.model is None:
             self.model = TFBertForSequenceClassification.from_pretrained(
-                'bert-base-uncased',
+                model_name,
                 num_labels=3
             )
 
@@ -233,7 +248,7 @@ class HateSpeechDetector:
         
         # Calculate class weights
         class_weights = self.calculate_class_weights(train_df[label_column])
-        
+        filename = os.path.join(model_dir, f'model_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
         # Callbacks
         callbacks = [
             tf.keras.callbacks.EarlyStopping(
@@ -242,7 +257,7 @@ class HateSpeechDetector:
                 restore_best_weights=True
             ),
             tf.keras.callbacks.ModelCheckpoint(
-                f'model_checkpoint_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
+                filepath=filename,
                 monitor='val_loss',
                 save_best_only=True
             ),
@@ -277,7 +292,7 @@ class HateSpeechDetector:
     def plot_training_history(self):
         """Plot training metrics."""
         fig, axs = plt.subplots(2, 2, figsize=(12, 10))
-        fig.suptitle('Training and Validation Metrics', fontsize=16)
+        fig.suptitle(f'Training and Validation Metrics {data_file}', fontsize=16)
         
         # Plot loss
         axs[0, 0].plot(self.history.history['loss'], label='Training Loss')
@@ -312,7 +327,12 @@ class HateSpeechDetector:
         axs[1, 1].legend()
         
         plt.tight_layout(rect=[0, 0, 1, 0.96])
-        plt.savefig(f'training_history_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png')
+        filename = os.path.join(fig_dir, f'training_history_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png')
+        try:
+            plt.savefig(filename)
+            logging.info(f"Training history saved successfully: {filename}")
+        except Exception as e:
+            logging.error(f"Error saving training history: {e}")
         plt.close()
     
     def evaluate(self, test_df, text_column, label_column):
@@ -372,11 +392,10 @@ class HateSpeechDetector:
         print("Plotting confusion matrix...")
         plt.figure(figsize=(8, 6))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-        plt.title('Confusion Matrix')
+        plt.title(f'Confusion Matrix {data_file}')
         plt.ylabel('True Label')
         plt.xlabel('Predicted Label')
-
-        filename = f'confusion_matrix_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png'
+        filename = os.path.join(fig_dir, f'confusion_matrix_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png')
         logging.info(f"Saving confusion matrix to {filename}")
         try:
             plt.savefig(filename)
@@ -397,7 +416,7 @@ class HateSpeechDetector:
                 })
         
         error_df = pd.DataFrame(errors)
-        error_df.to_csv(f'error_analysis_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv', index=False)
+        error_df.to_csv(os.path.join(error_analytics_dir, f'error_analysis_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'), index=False)
         logging.info(f"Found {len(errors)} errors. Error analysis saved to CSV.")
     
     def predict(self, texts):
@@ -442,7 +461,7 @@ class HateSpeechDetector:
 # Usage example
 if __name__ == "__main__":
     # Load your data
-    df = pd.read_csv("datasets/labeled_data_added_emoji.csv")
+    df = pd.read_csv(data_file)
     train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
     train_df, val_df = train_test_split(train_df, test_size=0.2, random_state=42)
 
@@ -459,7 +478,7 @@ if __name__ == "__main__":
     )
 
     # Save model
-    detector.save_model("saved_model")
+    detector.save_model("best_model")
     
     # Evaluate model
     metrics = detector.evaluate(
@@ -479,7 +498,7 @@ if __name__ == "__main__":
     predictions, probabilities = detector.predict(test_texts)
 
     # Load the saved model
-    detector = HateSpeechDetector.load_model("saved_model")
+    detector = HateSpeechDetector.load_model("best_model")
 
     # Print predictions
     label_map = {0: "Hate Speech", 1: "Offensive Language", 2: "Neutral"}
