@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from transformers import BertTokenizer, TFBertForSequenceClassification
+from sklearn.utils import resample
 import seaborn as sns
 # Check GPU availability
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
@@ -235,6 +236,9 @@ class HateSpeechDetector:
         train_df = self.prepare_data(train_df, text_column)
         val_df = self.prepare_data(val_df, text_column)
         
+        # Apply upsampling
+        train_df = self.upsample_minority(train_df, label_column)
+        
         # Create datasets
         train_ds = self.tokenize_data(train_df[text_column], train_df[label_column])
         val_ds = self.tokenize_data(val_df[text_column], val_df[label_column])
@@ -282,6 +286,26 @@ class HateSpeechDetector:
         logging.info("Model training completed.")
         self.plot_training_history()
         
+    # Upsample the minority classes
+    def upsample_minority(df, label_column):
+        """Upsample the minority class."""
+        # Separate majority and minority classes
+        majority_class = df[df[label_column] == 1]
+        minority_classes = df[df[label_column] != 1]
+        
+        # Upsample minority class
+        minority_upsampled = resample(
+            minority_classes,
+            replace=True,
+            n_samples=len(majority_class),
+            random_state=42
+        )
+        
+        # Combine majority class with upsampled minority class
+        upsampled_df = pd.concat([majority_class, minority_upsampled])
+        
+        return upsampled_df.sample(frac=1, random_state=42)
+
     def calculate_class_weights(self, labels):
         """Calculate balanced class weights."""
         counts = np.bincount(labels)
