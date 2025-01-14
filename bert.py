@@ -17,8 +17,10 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from transformers import BertTokenizer, TFBertForSequenceClassification
-from sklearn.utils import resample
 import seaborn as sns
+
+# from sklearn.utils import resample
+
 
 # Check GPU availability
 print("Num GPUs Available: ", len(tf.config.list_physical_devices("GPU")))
@@ -26,7 +28,7 @@ print(tf.config.list_physical_devices("GPU"))
 
 # Constants
 model_name = "bert-base-uncased"
-data_file = "datasets/labeled_data.csv"
+data_file = "datasets/labeled_data_added_emoji.csv"
 
 # Directories for logs, figures, models, and errors
 log_dir = "logs"
@@ -62,7 +64,7 @@ class HateSpeechDetector:
         self.history = None
 
     def analyse_data_distribution(self, texts, labels):
-        # Check label distribution
+        """Check label distribution"""
         total = len(labels)
         hate_speech = sum(labels == 0)
         offensive_language = sum(labels == 1)
@@ -267,8 +269,8 @@ class HateSpeechDetector:
         train_df = self.prepare_data(train_df, text_column)
         val_df = self.prepare_data(val_df, text_column)
 
-        # Apply upsampling
-        train_df = self.upsample_minority(train_df, label_column)
+        # # Apply upsampling
+        # train_df = self.upsample_minority(train_df, label_column)
 
         # Create datasets
         train_ds = self.tokenize_data(train_df[text_column], train_df[label_column])
@@ -315,24 +317,24 @@ class HateSpeechDetector:
         self.plot_training_history()
 
     # Upsample the minority classes
-    def upsample_minority(self, df, label_column):
-        """Upsample the minority class."""
-        # Separate majority and minority classes
-        majority_class = df[df[label_column] == 1]
-        minority_classes = df[df[label_column] != 1]
+    # def upsample_minority(self, df, label_column):
+    #     """Upsample the minority class."""
+    #     # Separate majority and minority classes
+    #     majority_class = df[df[label_column] == 1]
+    #     minority_classes = df[df[label_column] != 1]
 
-        # Upsample minority class
-        minority_upsampled = resample(
-            minority_classes,
-            replace=True,
-            n_samples=len(majority_class),
-            random_state=42,
-        )
+    #     # Upsample minority class
+    #     minority_upsampled = resample(
+    #         minority_classes,
+    #         replace=True,
+    #         n_samples=len(majority_class),
+    #         random_state=42,
+    #     )
 
-        # Combine majority class with upsampled minority class
-        upsampled_df = pd.concat([majority_class, minority_upsampled])
+    #     # Combine majority class with upsampled minority class
+    #     upsampled_df = pd.concat([majority_class, minority_upsampled])
 
-        return upsampled_df.sample(frac=1, random_state=42)
+    #     return upsampled_df.sample(frac=1, random_state=42)
 
     def calculate_class_weights(self, labels):
         """Calculate balanced class weights."""
@@ -523,7 +525,6 @@ class HateSpeechDetector:
         return detector
 
 
-# Usage example
 if __name__ == "__main__":
     # Load your data
     df = pd.read_csv(data_file)
@@ -556,7 +557,7 @@ if __name__ == "__main__":
     print("Testing the saved model...")
 
     # Load test data
-    test_texts = pd.read_csv("datasets/test_data.csv")["text"]
+    test_texts = pd.read_csv("datasets/test_data_added_emoji.csv")["text"]
     processed_test_texts = [detector.preprocess_text(t) for t in test_texts]
     predictions, probabilities = detector.predict(test_texts)
 
