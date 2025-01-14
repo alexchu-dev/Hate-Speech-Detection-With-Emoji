@@ -315,7 +315,7 @@ class HateSpeechDetector:
         self.plot_training_history()
 
     # Upsample the minority classes
-    def upsample_minority(df, label_column):
+    def upsample_minority(self, df, label_column):
         """Upsample the minority class."""
         # Separate majority and minority classes
         majority_class = df[df[label_column] == 1]
@@ -539,7 +539,7 @@ if __name__ == "__main__":
         val_df=val_df,
         text_column="text",
         label_column="label",
-        epochs=50,
+        epochs=20,
     )
 
     # Save model
