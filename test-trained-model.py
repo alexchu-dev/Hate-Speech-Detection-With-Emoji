@@ -54,7 +54,7 @@ def weighted_loss(y_true, y_pred):
 
 
 # Load the saved model
-model_path = "models/model_iteration_1"
+model_path = "best_model"
 loaded_model = TFBertForSequenceClassification.from_pretrained(model_path)
 print("Model loaded successfully!")
 

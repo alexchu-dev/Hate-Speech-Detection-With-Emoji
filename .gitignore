@@ -2,3 +2,4 @@ logs
 models
 model_checkpoint*
 best_model
+error_analytics
