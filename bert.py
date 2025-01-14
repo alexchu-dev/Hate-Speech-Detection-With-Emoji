@@ -346,7 +346,7 @@ class HateSpeechDetector:
     def plot_training_history(self):
         """Plot training metrics."""
         fig, axs = plt.subplots(2, 2, figsize=(12, 10))
-        fig.suptitle(f"Training and Validation Metrics {data_file}", fontsize=16)
+        fig.suptitle(f"Training and Validation Metrics\n{data_file}", fontsize=16)
 
         # Plot loss
         axs[0, 0].plot(self.history.history["loss"], label="Training Loss")
@@ -452,7 +452,7 @@ class HateSpeechDetector:
         print("Plotting confusion matrix...")
         plt.figure(figsize=(8, 6))
         sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-        plt.title(f"Confusion Matrix {data_file}")
+        plt.title(f"Confusion Matrix\n{data_file}")
         plt.ylabel("True Label")
         plt.xlabel("Predicted Label")
         filename = os.path.join(
