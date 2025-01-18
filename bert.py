@@ -242,7 +242,7 @@ class HateSpeechDetector:
             )
 
             # Add class weights (higher weight for hate speech)
-            weights = tf.constant([6.0, 1.0, 3.0])
+            weights = tf.constant([3.4, 1.0, 2.3])
             sample_weights = tf.reduce_sum(y_true * weights, axis=1)
 
             # Apply weights

@@ -45,7 +45,7 @@ def preprocess_text(text):
 
 # Define custom loss function
 def weighted_loss(y_true, y_pred):
-    weights = tf.constant([6.0, 1.0, 3.0])  # Adjust weights as needed
+    weights = tf.constant([3.4, 1.0, 2.3])  # Adjust weights as needed
     y_true = tf.cast(y_true, tf.int32)
     sample_weights = tf.gather(weights, y_true)
     loss = tf.keras.losses.sparse_categorical_crossentropy(y_true, y_pred)
