@@ -59,7 +59,7 @@ loaded_model = TFBertForSequenceClassification.from_pretrained(model_path)
 print("Model loaded successfully!")
 
 # Load the tokenizer
-tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+tokenizer = BertTokenizer.from_pretrained(model_path)
 
 
 # Prediction function
