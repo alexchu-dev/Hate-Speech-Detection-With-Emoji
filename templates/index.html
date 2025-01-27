@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hate Speech with Emoji Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 50%;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        textarea {
+            width: 80%;
+            height: 100px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+        }
+
+        .result h2 {
+            color: #444;
+        }
+
+        .result p {
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Hate Speech with Emoji Detection</h1>
+        <form method="POST">
+            <textarea name="text" placeholder="Enter some hate/non hate text with emojis." required></textarea><br>
+            <button type="submit">Submit</button>
+        </form>
+
+        {% if result %}F
+        <div class="result">
+            <h2>Prediction Result</h2>
+            <p><strong>Input Text:</strong> {{ result.input_text }}</p>
+            <p><strong>Predicted Label:</strong> {{ result.predicted_label }}</p>
+            <p><strong>Probabilities:</strong> Hate Speech - {{ result.probabilities[0]|round(3) }}, Offensive Language
+                - {{
+                result.probabilities[1]|round(3) }}, Neutral - {{
+                result.probabilities[2]|round(3) }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

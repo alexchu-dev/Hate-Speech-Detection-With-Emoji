@@ -63,7 +63,7 @@ tokenizer = BertTokenizer.from_pretrained(model_path)
 
 
 # Prediction function
-def predict_texts(texts, tokenizer, model, max_length=128):
+def predict(texts, tokenizer, model, max_length=128):
     # Preprocess texts
     processed_texts = [preprocess_text(text) for text in texts]
 
@@ -89,7 +89,7 @@ text_data = pd.read_csv("datasets/test_data_added_emoji.csv")
 texts_to_predict = text_data["text"].tolist()
 
 # Get predictions
-processed_texts, predictions, probabilities = predict_texts(
+processed_texts, predictions, probabilities = predict(
     texts_to_predict, tokenizer, loaded_model
 )
 
@@ -112,7 +112,7 @@ test_text = [
     "ᶠᵁᶜᴷ ʸᴼᵁ",
     "I ❤️ you",
 ]
-processed_texts, predictions, probabilities = predict_texts(
+processed_texts, predictions, probabilities = predict(
     test_text, tokenizer, loaded_model
 )
 for text, processed, label, prob in zip(
