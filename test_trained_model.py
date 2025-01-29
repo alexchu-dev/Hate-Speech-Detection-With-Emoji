@@ -87,6 +87,7 @@ def predict(texts, tokenizer, model, max_length=128):
 # Example usage: Predict single or multiple texts
 text_data = pd.read_csv("datasets/test_data_added_emoji.csv")
 texts_to_predict = text_data["text"].tolist()
+text_data_original_label = text_data["label"].tolist()
 
 # Get predictions
 processed_texts, predictions, probabilities = predict(
@@ -95,11 +96,16 @@ processed_texts, predictions, probabilities = predict(
 
 # Print predictions
 label_map = {0: "Hate Speech", 1: "Offensive Language", 2: "Neutral"}
-for text, processed, label, prob in zip(
-    texts_to_predict, processed_texts, predictions, probabilities
+for text, original_label, processed, label, prob in zip(
+    texts_to_predict,
+    text_data_original_label,
+    processed_texts,
+    predictions,
+    probabilities,
 ):
     print(f"Original Text: {text}")
     print(f"Processed Text: {processed}")
+    print(f"Original Label: {label_map[original_label]}")
     print(f"Predicted Label: {label_map[label]}")
     print(f"Probabilities: {prob}\n")
 

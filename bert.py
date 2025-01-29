@@ -556,20 +556,27 @@ if __name__ == "__main__":
     # Test the saved model
     print("Testing the saved model...")
 
-    # Load test data
-    test_texts = pd.read_csv("datasets/test_data_added_emoji.csv")["text"]
-    processed_test_texts = [detector.preprocess_text(t) for t in test_texts]
-    predictions, probabilities = detector.predict(test_texts)
-
     # Load the saved model
     detector = HateSpeechDetector.load_model("best_model")
+    # Load test data
+    test_texts = pd.read_csv("datasets/test_data_added_emoji.csv")["text"]
+    test_texts_original_labels = pd.read_csv("datasets/test_data_added_emoji.csv")[
+        "label"
+    ]
+    processed_test_texts = [detector.preprocess_text(t) for t in test_texts]
+    predictions, probabilities = detector.predict(processed_test_texts)
 
     # Print predictions
     label_map = {0: "Hate Speech", 1: "Offensive Language", 2: "Neutral"}
-    for text, processed_test_texts, label, prob in zip(
-        test_texts, processed_test_texts, predictions, probabilities
+    for text, original_label, processed_test_text, label, prob in zip(
+        test_texts,
+        test_texts_original_labels,
+        processed_test_texts,
+        predictions,
+        probabilities,
     ):
         print(f"Original Text: {text}")
-        print(f"Processed text: {processed_test_texts}")
+        print(f"Processed text: {processed_test_text}")
+        print(f"Original Label: {label_map[original_label]}")
         print(f"Predicted Label: {label_map[label]}")
         print(f"Probabilities: {prob}\n")
