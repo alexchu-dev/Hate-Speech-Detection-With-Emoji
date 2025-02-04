@@ -261,7 +261,7 @@ class HateSpeechDetector:
             ],
         )
 
-    def train(self, train_df, val_df, text_column, label_column, epochs=20):
+    def train(self, train_df, val_df, text_column, label_column, epochs=11):
         """Train the model with cross-validation."""
         logging.info("Starting model training...")
 
